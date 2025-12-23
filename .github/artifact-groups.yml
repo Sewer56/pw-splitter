@@ -1,0 +1,9 @@
+Linux-Binary:
+  patterns:
+    - "*-unknown-linux-*"
+  renames:
+    - "-unknown-linux-gnu": "-linux"
+Symbols:
+  patterns: "*.symbols"
+  renames:
+    - ".symbols": ""
