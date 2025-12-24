@@ -3,60 +3,32 @@ mod pipewire;
 mod splitter;
 mod tui;
 
-use argh::FromArgs;
+use pico_args::Arguments;
 use splitter::SplitState;
 
-/// PipeWire audio routing TUI for splitting audio streams
-#[derive(FromArgs)]
-struct Cli {
-    /// print version information
-    #[argh(switch, short = 'V')]
-    version: bool,
-
-    #[argh(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(FromArgs, PartialEq, Debug)]
-#[argh(subcommand)]
-enum Commands {
-    List(ListCmd),
-    Stop(StopCmd),
-    StopAll(StopAllCmd),
-}
-
-/// List all active splits
-#[derive(FromArgs, PartialEq, Debug)]
-#[argh(subcommand, name = "list")]
-struct ListCmd {}
-
-/// Stop a specific split by name
-#[derive(FromArgs, PartialEq, Debug)]
-#[argh(subcommand, name = "stop")]
-struct StopCmd {
-    /// name of the split to stop
-    #[argh(positional)]
-    name: String,
-}
-
-/// Stop all active splits
-#[derive(FromArgs, PartialEq, Debug)]
-#[argh(subcommand, name = "stop-all")]
-struct StopAllCmd {}
-
 fn main() {
-    let cli: Cli = argh::from_env();
+    let mut args = Arguments::from_env();
 
-    if cli.version {
+    let version = args.contains(["-V", "--version"]);
+
+    if version {
         println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         return;
     }
 
-    let result = match cli.command {
-        Some(Commands::List(_)) => list_splits(),
-        Some(Commands::Stop(cmd)) => stop_split(&cmd.name),
-        Some(Commands::StopAll(_)) => stop_all_splits(),
-        None => run_tui(),
+    let subcommand: Option<String> = args.subcommand().ok().flatten();
+
+    let result = match subcommand.as_ref().map(|s| s.as_str()) {
+        Some("list") => list_splits(),
+        Some("stop") => {
+            let name: String = args.free_from_str().unwrap_or_else(|_| {
+                eprintln!("Error: missing split name for 'stop' command");
+                std::process::exit(1);
+            });
+            stop_split(&name)
+        }
+        Some("stop-all") => stop_all_splits(),
+        None | Some(_) => run_tui(),
     };
 
     if let Err(e) = result {
