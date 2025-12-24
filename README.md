@@ -263,7 +263,7 @@ Dependencies:
 - `ratatui` - TUI framework
 - `crossterm` - Terminal handling
 - `serde` / `serde_json` - State serialization
-- `clap` - CLI parsing
+- `argh` - CLI parsing
 - `thiserror` - Error handling
 
 Runtime requirements:

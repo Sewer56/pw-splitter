@@ -3,38 +3,59 @@ mod pipewire;
 mod splitter;
 mod tui;
 
-use clap::{Parser, Subcommand};
+use argh::FromArgs;
 use splitter::SplitState;
 
-#[derive(Parser)]
-#[command(name = "pw-splitter")]
-#[command(about = "PipeWire audio routing TUI for splitting audio streams")]
-#[command(version)]
+/// PipeWire audio routing TUI for splitting audio streams
+#[derive(FromArgs)]
 struct Cli {
-    #[command(subcommand)]
+    /// print version information
+    #[argh(switch, short = 'V')]
+    version: bool,
+
+    #[argh(subcommand)]
     command: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand)]
 enum Commands {
-    /// List all active splits
-    List,
-    /// Stop a specific split by name
-    Stop {
-        /// Name of the split to stop
-        name: String,
-    },
-    /// Stop all active splits
-    StopAll,
+    List(ListCmd),
+    Stop(StopCmd),
+    StopAll(StopAllCmd),
 }
 
+/// List all active splits
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "list")]
+struct ListCmd {}
+
+/// Stop a specific split by name
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "stop")]
+struct StopCmd {
+    /// name of the split to stop
+    #[argh(positional)]
+    name: String,
+}
+
+/// Stop all active splits
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "stop-all")]
+struct StopAllCmd {}
+
 fn main() {
-    let cli = Cli::parse();
+    let cli: Cli = argh::from_env();
+
+    if cli.version {
+        println!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        return;
+    }
 
     let result = match cli.command {
-        Some(Commands::List) => list_splits(),
-        Some(Commands::Stop { name }) => stop_split(&name),
-        Some(Commands::StopAll) => stop_all_splits(),
+        Some(Commands::List(_)) => list_splits(),
+        Some(Commands::Stop(cmd)) => stop_split(&cmd.name),
+        Some(Commands::StopAll(_)) => stop_all_splits(),
         None => run_tui(),
     };
 
