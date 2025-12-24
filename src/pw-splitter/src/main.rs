@@ -18,7 +18,7 @@ fn main() {
 
     let subcommand: Option<String> = args.subcommand().ok().flatten();
 
-    let result = match subcommand.as_ref().map(|s| s.as_str()) {
+    let result = match subcommand.as_deref() {
         Some("list") => list_splits(),
         Some("stop") => {
             let name: String = args.free_from_str().unwrap_or_else(|_| {

@@ -39,6 +39,34 @@ AFTER (independent volume control):
     Adjust "To Local" volume in pwvucontrol - recording stays at 100%.
 ```
 
+## Installation
+
+**First, check your package manager** (e.g., `dnf install pw-splitter`, `pacman -S pw-splitter`) for a pre-packaged version.
+
+### From GitHub Releases (Recommended)
+
+Download the latest release from [GitHub Releases](https://github.com/Sewer56/pw-splitter/releases). Pre-built binaries are available for:
+
+- `linux-x64.zip` (x86_64)
+- `linux-x86.zip` (i686)
+- `linux-arm64.zip` (aarch64)
+
+```bash
+# Download and run (example for x86_64)
+wget https://github.com/Sewer56/pw-splitter/releases/latest/download/linux-x64.zip
+unzip linux-x64.zip
+chmod +x pw-splitter
+./pw-splitter
+```
+
+### From crates.io
+
+If you have Rust installed, install from crates.io:
+
+```bash
+cargo install pw-splitter
+```
+
 ## Quick Start
 
 ```bash
